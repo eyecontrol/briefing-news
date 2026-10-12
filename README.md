@@ -8,6 +8,7 @@ Ogni mattina una pagina in stile quotidiano con le notizie che contano, raccolte
 - Lo script legge i feed RSS elencati in `briefing/sources.py`, scarta le notizie vecchie, quelle di sport e spettacolo e la cronaca che non rientra in nessuna sezione.
 - La stessa notizia ripresa da più testate viene unita; quelle riprese da più giornali salgono in apertura.
 - La pagina generata (`site/index.html`) viene pubblicata su GitHub Pages.
+- Ogni mattina il workflow si riattiva da solo, così GitHub non lo sospende dopo 60 giorni senza modifiche.
 
 Non servono librerie esterne: solo Python 3.11 o successivo.
 

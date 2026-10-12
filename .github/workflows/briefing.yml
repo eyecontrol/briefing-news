@@ -11,6 +11,7 @@ on:
   pull_request:
 
 permissions:
+  actions: write
   contents: read
   pages: write
   id-token: write
@@ -55,3 +56,14 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  keepalive:
+    # GitHub sospende i lavori programmati dopo 60 giorni senza modifiche al repository.
+    # Riattivare ogni giorno il workflow azzera il conteggio.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mantieni attivi gli aggiornamenti automatici
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT "repos/${{ github.repository }}/actions/workflows/briefing.yml/enable"
