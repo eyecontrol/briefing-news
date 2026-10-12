@@ -55,6 +55,9 @@ nav.bar .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 1
 .seg { display: inline-flex; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
 .seg button { font: 700 13px var(--f-label); letter-spacing: .04em; border: 0; background: transparent; color: var(--ink); padding: 7px 16px; cursor: pointer; }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--card); }
+.seg.lang button { display: inline-flex; align-items: center; gap: 7px; }
+.flag { width: 21px; height: 14px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.25); flex: none; }
+.by .flag { width: 18px; height: 12px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { --c: var(--ink); font: 600 13px var(--f-label); border: 2px solid var(--c); background: var(--c); color: #fff; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
 .chip[aria-pressed="false"] { background: transparent; color: var(--grey); border-color: var(--line); text-decoration: line-through; }
@@ -129,6 +132,11 @@ footer.colophon { margin-top: 30px; background: var(--card); border-top: 1px sol
       <button id="scope-world" data-scope="world" aria-pressed="true">Mondo</button>
       <button id="scope-italy" data-scope="italy" aria-pressed="false">Italia</button>
     </div>
+    <div class="seg lang" role="group" aria-label="Lingua">
+      <button id="lang-all" data-lang="all" aria-pressed="true">Tutte</button>
+      <button id="lang-it" data-lang="IT" aria-pressed="false" title="Solo notizie in italiano"><svg class="flag" viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#009246"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ce2b37"/></svg>Italiano</button>
+      <button id="lang-en" data-lang="EN" aria-pressed="false" title="Solo notizie in inglese"><svg class="flag" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="uk-t"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath><path d="M0,0v30h60v-30z" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" clip-path="url(#uk-t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></svg>English</button>
+    </div>
     <div class="chips" role="group" aria-label="Sezioni" id="topics"></div>
   </div>
 </nav>
@@ -153,7 +161,8 @@ __COLOPHON__
 <script>
 const T = __SECTIONS__;
 const stories = __DATA__;
-const state = { scope: "world", on: new Set(Object.keys(T)) };
+const state = { scope: "world", lang: "all", on: new Set(Object.keys(T)) };
+const FLAGS = { IT: document.querySelector("#lang-it .flag").outerHTML, EN: document.querySelector("#lang-en .flag").outerHTML };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const link = (s, text, cls) => `<a${cls ? ` class="${cls}"` : ""} href="${esc(s.url)}" target="_blank" rel="noopener">${text}</a>`;
 const topics = document.getElementById("topics");
@@ -167,10 +176,10 @@ Object.entries(T).forEach(([k, name]) => {
   });
   topics.appendChild(b);
 });
-const by = s => `<div class="by lbl"><span class="src">${esc(s.src)}</span><span class="lang">${s.lang}</span><span>${esc(s.time)}</span></div>`;
+const by = s => `<div class="by lbl"><span class="src">${esc(s.src)}</span>${FLAGS[s.lang] || ""}<span>${esc(s.time)}</span></div>`;
 const also = s => s.also.length ? `<div class="also">Anche su <b>${s.also.map(esc).join(", ")}</b></div>` : "";
 function render() {
-  const vis = stories.filter(s => state.on.has(s.t) && (state.scope === "world" || s.it));
+  const vis = stories.filter(s => state.on.has(s.t) && (state.scope === "world" || s.it) && (state.lang === "all" || s.lang === state.lang));
   const lead = document.getElementById("lead");
   const top = vis[0];
   const brief = vis.slice(1, 5);
@@ -190,11 +199,14 @@ function render() {
     box.appendChild(sec);
   }
 }
-document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
-  state.scope = b.dataset.scope;
-  document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-  render();
-}));
+for (const [key, attr] of [["scope", "data-scope"], ["lang", "data-lang"]]) {
+  const group = document.querySelectorAll(`.seg button[${attr}]`);
+  group.forEach(b => b.addEventListener("click", () => {
+    state[key] = b.getAttribute(attr);
+    group.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    render();
+  }));
+}
 render();
 </script>
 </body>
