@@ -58,6 +58,18 @@ class BuildFromFixtures(unittest.TestCase):
 
 
 class Rules(unittest.TestCase):
+    def test_same_event_with_different_wording_is_merged(self):
+        items = [
+            {"title": "One killed, 11 injured in second Houthi strike on Riyadh airport in two days"},
+            {"title": "Houthis attack Riyadh airport"},
+            {"title": "Pope Leo will have surgery to remove growth on lung"},
+        ]
+        groups = build.cluster(items)
+        self.assertEqual([len(g["items"]) for g in groups], [2, 1])
+
+    def test_columns_and_newsletters_excluded(self):
+        self.assertTrue(classify.is_excluded("Country diary: Fungi season is here", "", "https://x/science/1"))
+
     def test_city_names_do_not_trigger_sport_filter(self):
         self.assertFalse(classify.is_excluded("Milan prosecutors open inquiry into bank", "", "https://x/world/1"))
 

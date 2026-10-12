@@ -12,7 +12,6 @@ Solo testate storiche e agenzie riconosciute. Ogni feed ha:
 OUTLETS = {
     "ANSA": (1945, "Italia", "IT"),
     "Corriere della Sera": (1876, "Italia", "IT"),
-    "La Stampa": (1867, "Italia", "IT"),
     "Il Sole 24 Ore": (1865, "Italia", "IT"),
     "Il Messaggero": (1878, "Italia", "IT"),
     "la Repubblica": (1976, "Italia", "IT"),
@@ -59,10 +58,6 @@ FEEDS = [
     feed("la Repubblica", "https://www.repubblica.it/rss/economia/rss2.0.xml", "eco"),
     feed("la Repubblica", "https://www.repubblica.it/rss/scienze/rss2.0.xml", "sci"),
     feed("la Repubblica", "https://www.repubblica.it/rss/tecnologia/rss2.0.xml", "tec"),
-    feed("La Stampa", "https://www.lastampa.it/rss/politica.xml", "pol", italy=True),
-    feed("La Stampa", "https://www.lastampa.it/rss/esteri.xml", "pol"),
-    feed("La Stampa", "https://www.lastampa.it/rss/economia.xml", "eco"),
-    feed("La Stampa", "https://www.lastampa.it/rss/scienza.xml", "sci"),
     feed("Il Sole 24 Ore", "https://www.ilsole24ore.com/rss/italia.xml", "pol", italy=True),
     feed("Il Sole 24 Ore", "https://www.ilsole24ore.com/rss/mondo.xml", "pol"),
     feed("Il Sole 24 Ore", "https://www.ilsole24ore.com/rss/economia.xml", "eco"),
@@ -102,7 +97,6 @@ FEEDS = [
     feed("The New England Journal of Medicine", "https://www.nejm.org/action/showFeed?type=etoc&feed=rss&jc=nejm", "med", max_age_h=192),
     feed("The Lancet", "https://www.thelancet.com/rssfeed/lancet_online.xml", "med", max_age_h=192),
     feed("The BMJ", "https://www.bmj.com/rss/recent.xml", "med", max_age_h=72),
-    feed("The BMJ", "https://feeds.bmj.com/bmj/recent", "med", max_age_h=72),
     # Scienza e tecnologia
     feed("Nature", "https://www.nature.com/nature.rss", "sci", max_age_h=96),
     feed("Scientific American", "https://www.scientificamerican.com/platform/syndication/rss/", "sci", max_age_h=72),

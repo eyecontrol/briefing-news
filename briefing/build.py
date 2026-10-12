@@ -8,9 +8,7 @@ import argparse
 import html
 import json
 import re
-import subprocess
 import sys
-import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
@@ -38,18 +36,8 @@ MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", 
 
 def fetch(url, timeout=20):
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/rss+xml, application/xml, text/xml, */*"})
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return r.read()
-    except urllib.error.URLError as e:
-        # Alcuni siti rifiutano la connessione TLS di Python ma accettano curl.
-        if isinstance(e, urllib.error.HTTPError):
-            raise
-        done = subprocess.run(["curl", "-fsSL", "--max-time", str(timeout), "-A", USER_AGENT, url],
-                              capture_output=True, check=False)
-        if done.returncode != 0 or not done.stdout:
-            raise
-        return done.stdout
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read()
 
 
 def _local(tag):
@@ -132,8 +120,9 @@ oggi ieri ecco tutti tutto molto loro nostro their there been were which while
 
 
 def tokens(title):
+    """Parole significative del titolo, tagliate a 5 lettere per unire singolare e plurale."""
     words = re.findall(r"[a-z0-9]+", classify.normalize(title))
-    return {w for w in words if len(w) >= 4 and w not in STOP}
+    return {w[:5] for w in words if len(w) >= 4 and w not in STOP}
 
 
 def cluster(items):
@@ -145,7 +134,7 @@ def cluster(items):
         best = None
         for g in groups:
             inter = len(tk & g["tk"])
-            if inter >= 3 and inter / max(1, len(tk | g["tk"])) >= 0.3:
+            if inter >= 3 and inter / max(1, min(len(tk), len(g["tk"]))) >= 0.5:
                 best = g
                 break
         if best:

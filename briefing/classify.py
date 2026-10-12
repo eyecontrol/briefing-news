@@ -30,6 +30,7 @@ EXCLUDE_WORDS = _rx([
     r"oroscopo", r"horoscope", r"ricett", r"recipe", r"moda\b", r"fashion", r"reality show",
     r"serie tv", r"netflix series", r"concerto\b", r"cantante", r"singer",
     r"attore\b", r"attrice", r"actor\b", r"actress", r"royal family", r"principe harry", r"prince harry",
+    r"country diary", r"crossword", r"cruciverba", r"quiz\b", r"podcast", r"newsletter", r"firstft",
 ])
 
 EXCLUDE_URL = re.compile(
