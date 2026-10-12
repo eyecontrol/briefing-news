@@ -7,6 +7,7 @@ Con --fixtures legge i feed da file locali (per i test) invece che dalla rete.
 import argparse
 import html
 import json
+import os
 import re
 import sys
 import urllib.request
@@ -365,8 +366,11 @@ def main(argv=None):
     lengths = {}
     for it in raw_items:
         lengths.setdefault(it["source"], []).append(sum(map(len, it.get("body", []))))
-    for src, ls in sorted(lengths.items(), key=lambda x: -sum(x[1]) / len(x[1])):
-        print(f"  {src:<36} {sum(ls) // len(ls):5d}  (max {max(ls)})")
+    rows = [f"{src}: {sum(ls) // len(ls)} (max {max(ls)})"
+            for src, ls in sorted(lengths.items(), key=lambda x: -sum(x[1]) / len(x[1]))]
+    print("\n".join("  " + r for r in rows))
+    if os.environ.get("GITHUB_ACTIONS"):
+        print("::notice title=Testo per testata::" + "%0A".join(rows))
     print(f"\nNotizie scelte: {len(stories)}  per sezione: {by_sec}  testate attive: {len(ok_sources)}/{len(OUTLETS)}")
 
     out = Path(args.out)
