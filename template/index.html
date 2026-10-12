@@ -113,7 +113,7 @@ article.card { background: var(--card); border: 1px solid var(--line); border-ra
 .reader h1 { font-weight: 800; font-size: clamp(26px, 5vw, 38px); line-height: 1.12; margin: 0; text-wrap: balance; }
 .reader .text p { font-size: 19px; line-height: 1.6; margin: 0 0 16px; }
 .reader .note { font-family: var(--f-label); font-size: 13px; color: var(--grey); border-top: 1px solid var(--line); padding-top: 12px; margin: 6px 0 0; }
-.reader .note a { color: var(--grey); }
+.reader .full { justify-self: start; display: inline-block; font: 700 15px var(--f-label); color: #fff; background: var(--c); border-radius: 999px; padding: 11px 20px; text-decoration: none; }
 body.reading { overflow: hidden; }
 
 /* Fonti */
@@ -262,7 +262,8 @@ function openStory() {
   document.getElementById("reader-body").className = "c-" + s.t;
   document.getElementById("reader-body").innerHTML = `<span class="kicker lbl">${esc(T[s.t])}</span><h1>${esc(s.h)}</h1>${by(s)}${also(s)}
     <div class="text">${text.map(p => `<p>${esc(p)}</p>`).join("") || "<p><i>Il giornale non pubblica il testo di questa notizia.</i></p>"}</div>
-    <p class="note">${from}${short ? "Il giornale rende disponibile solo questo estratto. " : ""}Fonte: <a href="${esc(orig.url)}" target="_blank" rel="noopener">${esc(orig.src || s.src)} ↗</a></p>`;
+    <a class="full" href="${esc(orig.url)}" target="_blank" rel="noopener">Articolo completo su ${esc(orig.src || s.src)} ↗</a>
+    <p class="note">${from}${short ? "Il giornale pubblica qui solo un estratto. " : ""}Per leggerlo senza pubblicità usa la lettura semplificata del telefono: su iPhone "Aa" → Mostra lettore, su Android menu ⋮ → Visualizzazione semplificata.</p>`;
   reader.hidden = false;
   document.body.classList.add("reading");
   reader.scrollTop = 0;
