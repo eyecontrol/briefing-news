@@ -15,6 +15,7 @@ SECTIONS = {
 
 
 def _rx(words):
+    # I testi vengono confrontati dopo normalize(): minuscole e senza accenti (č->c, š->s, ž->z, ć->c).
     return re.compile(r"\b(?:" + "|".join(words) + r")", re.IGNORECASE)
 
 
@@ -31,10 +32,15 @@ EXCLUDE_WORDS = _rx([
     r"serie tv", r"netflix series", r"concerto\b", r"cantante", r"singer",
     r"attore\b", r"attrice", r"actor\b", r"actress", r"royal family", r"principe harry", r"prince harry",
     r"country diary", r"crossword", r"cruciverba", r"quiz\b", r"podcast", r"newsletter", r"firstft",
+    # serbo
+    r"fudbal", r"kosark", r"odbojk", r"vaterpol", r"zvezd", r"partizan", r"dokovic", r"djokovic", r"sport",
+    r"pevac", r"pevacic", r"glumac", r"glumic", r"rijaliti", r"estrad", r"horoskop",
+    r"фудбал", r"кошарк", r"одбојк", r"ватерпол", r"звезд", r"партизан", r"ђоковић", r"спорт",
+    r"певач", r"глумац", r"глумиц", r"ријалити", r"естрад", r"хороскоп",
 ])
 
 EXCLUDE_URL = re.compile(
-    r"/(sport|sports|calcio|football|soccer|spettacoli|spettacolo|cultura|culture|people|gossip|moda|"
+    r"/(sport|sports|calcio|zabava|scena|showbiz|football|soccer|spettacoli|spettacolo|cultura|culture|people|gossip|moda|"
     r"fashion|lifestyle|lifeandstyle|life-and-style|food|cucina|viaggi|travel|motori|tv-and-radio|film|"
     r"music|musica|stage|books|libri|games|oroscopo|style|arts|entertainment|television)(/|$|-)",
     re.IGNORECASE,
@@ -48,6 +54,8 @@ WAR = _rx([
     r"tregua", r"truce", r"invasion", r"fronte\b", r"nato\b", r"hamas",
     r"hezbollah", r"houthi", r"gaza", r"ucrain", r"ukrain", r"kyiv", r"kiev", r"insurg", r"ribell",
     r"rebel", r"terror", r"ostagg", r"hostage", r"conflitt", r"conflict", r"armi\b", r"weapons",
+    r"rat\b", r"ratu\b", r"ratom\b", r"napad", r"vojsk", r"raket", r"primirj", r"ukrajin", r"izrael",
+    r"рат\b", r"рату\b", r"ратом\b", r"напад", r"војск", r"ракет", r"примирј", r"украјин", r"израел",
 ])
 
 CAT = _rx([
@@ -58,6 +66,8 @@ CAT = _rx([
     r"ondata di calore", r"heatwave", r"heat wave", r"carestia", r"famine", r"epidemi", r"pandemi",
     r"outbreak", r"disastr", r"disaster", r"naufrag", r"shipwreck", r"esplosion",
     r"explosion", r"incidente aereo", r"plane crash", r"deragliam", r"derail",
+    r"zemljotres", r"poplav", r"pozar", r"nevrem", r"klizist", r"susa\b", r"eksplozij",
+    r"земљотрес", r"поплав", r"пожар", r"невре", r"клизишт", r"суша\b", r"експлозиј",
 ])
 
 MED = _rx([
@@ -65,6 +75,7 @@ MED = _rx([
     r"drug\b", r"drugs\b", r"ospedal", r"hospital", r"sanit", r"health", r"salute", r"medic", r"virus",
     r"infezion", r"infection", r"alzheimer", r"diabet", r"cardi", r"heart\b", r"clinical trial",
     r"studio clinico", r"oms\b", r"antibiotic",
+    r"zdravlj", r"bolnic", r"vakcin", r"lekar", r"rak\b", r"здравл", r"болниц", r"вакцин", r"лекар",
 ])
 
 TEC = _rx([
@@ -72,6 +83,7 @@ TEC = _rx([
     r"chip", r"semicondutt", r"semiconductor", r"software", r"cyber", r"hacker", r"smartphone", r"apple\b",
     r"google\b", r"microsoft", r"meta\b", r"nvidia", r"robot", r"quantum", r"quantistic", r"5g\b",
     r"internet", r"digital", r"algoritm", r"algorithm", r"data cent", r"satellit",
+    r"tehnolog", r"vestack", r"softver", r"технолог", r"вештачк", r"софтвер", r"интернет",
 ])
 
 SCI = _rx([
@@ -79,6 +91,7 @@ SCI = _rx([
     r"spazio\b", r"space\b", r"nasa\b", r"esa\b", r"pianet", r"planet", r"galass", r"galax", r"fisic",
     r"physic", r"chimic", r"chemi", r"biolog", r"genetic", r"dna\b", r"clima", r"climate", r"fossil",
     r"evolu", r"specie", r"species", r"oceano", r"ocean",
+    r"nauk", r"naucn", r"istraziv", r"svemir", r"наук", r"научн", r"истражив", r"свемир",
 ])
 
 ECO = _rx([
@@ -87,6 +100,8 @@ ECO = _rx([
     r"spread", r"bilancio", r"budget", r"manovra", r"tariff", r"dazi", r"commerci", r"trade\b",
     r"banc", r"bank", r"finanz", r"financ", r"debito", r"debt", r"lavoro", r"jobs\b", r"occupazion",
     r"unemploy", r"petrolio", r"oil price", r"energia", r"energy",
+    r"ekonom", r"inflacij", r"berz", r"budzet", r"privred", r"plat[ae]\b", r"penzij", r"nbs\b",
+    r"економ", r"инфлациј", r"берз", r"буџет", r"привред", r"пензиј",
 ])
 
 POL = _rx([
@@ -94,9 +109,17 @@ POL = _rx([
     r"president", r"premier", r"partit", r"party\b", r"voto\b", r"vote\b", r"referendum", r"legge",
     r"law\b", r"riform", r"reform", r"diplomat", r"summit", r"vertice", r"sanzion", r"sanction",
     r"ue\b", r"eu\b", r"onu\b", r"united nations", r"trump", r"meloni", r"mattarella", r"congress",
+    r"vlad[aeiu]\b", r"skupstin", r"izbor", r"predsednik", r"ministar", r"vucic", r"stranka",
+    r"влад[аеиу]\b", r"скупштин", r"избор", r"председник", r"министар", r"вучић", r"странк",
 ])
 
-# Notizie che riguardano l'Italia.
+# Notizie che riguardano un paese, per le edizioni Italia e Serbia.
+SERBIA = _rx([
+    r"srbij", r"serbia", r"serbian", r"srpsk", r"beograd", r"belgrade", r"novi sad", r"nis\b", r"kragujev",
+    r"vojvodin", r"vucic", r"kosov", r"србиј", r"српск", r"београд", r"нови сад", r"ниш\b",
+    r"крагујев", r"војводин", r"вучић", r"косов",
+])
+
 ITALY = _rx([
     r"ital(ia|y|ian[oaie]?|iano|iana|iani|iane|ians?)\b", r"meloni", r"mattarella", r"palazzo chigi",
     r"quirinale", r"montecitorio", r"farnesina", r"tajani", r"salvini", r"schlein", r"conte\b",
@@ -109,21 +132,21 @@ ITALY = _rx([
 
 
 def normalize(text):
-    text = unicodedata.normalize("NFKD", text)
+    text = unicodedata.normalize("NFKD", text.replace("đ", "dj").replace("Đ", "Dj"))
     return "".join(c for c in text if not unicodedata.combining(c)).lower()
 
 
 def is_excluded(title, summary, url):
     if EXCLUDE_URL.search(url or ""):
         return True
-    return bool(EXCLUDE_WORDS.search(title or ""))
+    return bool(EXCLUDE_WORDS.search(normalize(title or "")))
 
 
 def pick_section(default, title, summary):
     """Sceglie la sezione. Guerre e catastrofi prevalgono sul feed generico;
     i feed tematici (scienza, medicina, ecc.) restano nella loro sezione."""
-    text = f"{title} {summary}"
-    head = title or ""
+    text = normalize(f"{title} {summary}")
+    head = normalize(title or "")
     if default in (None, "pol"):
         if WAR.search(head):
             return "war"
@@ -142,5 +165,11 @@ def pick_section(default, title, summary):
     return default
 
 
-def is_italy(feed_italy, title, summary):
-    return feed_italy or bool(ITALY.search(f"{title} {summary}"))
+def countries(feed_country, title, summary):
+    """Paesi (IT, RS) di cui parla la notizia."""
+    text = normalize(f"{title} {summary}")
+    found = {feed_country} if feed_country else set()
+    for code, rx in (("IT", ITALY), ("RS", SERBIA)):
+        if rx.search(text):
+            found.add(code)
+    return sorted(found)
