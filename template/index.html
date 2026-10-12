@@ -60,6 +60,8 @@ nav.bar .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 1
 .seg.lang button { display: inline-flex; align-items: center; gap: 7px; }
 .flag { width: 21px; height: 14px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.25); flex: none; }
 .by .flag { width: 18px; height: 12px; }
+.seg.lang .cd { display: none; }
+.ctl .long { white-space: nowrap; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { --c: var(--ink); font: 600 13px var(--f-label); border: 2px solid var(--c); background: var(--c); color: #fff; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
 .chip[aria-pressed="false"] { background: transparent; color: var(--grey); border-color: var(--line); text-decoration: line-through; }
@@ -116,6 +118,17 @@ footer.colophon { margin-top: 30px; background: var(--card); border-top: 1px sol
   .lead { grid-template-columns: 1fr; }
   .lead-main { padding: 18px; }
 }
+@media (max-width: 560px) {
+  nav.bar .wrap { gap: 8px 12px; padding-block: 8px; }
+  .ctl { flex-direction: row; align-items: center; gap: 8px; }
+  .ctl > .lbl { width: 62px; flex: none; line-height: 1.15; }
+  .seg button { padding: 6px 11px; font-size: 12.5px; }
+  .seg.lang button { gap: 5px; }
+  .seg.lang .nm, .ctl .long { display: none; }
+  .seg.lang .cd { display: inline; }
+  .chips { gap: 5px; }
+  .chip { font-size: 12px; padding: 4px 10px; }
+}
 </style>
 </head>
 <body>
@@ -136,12 +149,12 @@ footer.colophon { margin-top: 30px; background: var(--card); border-top: 1px sol
       <button id="scope-italy" data-scope="IT" aria-pressed="false">Italia</button>
       <button id="scope-serbia" data-scope="RS" aria-pressed="false">Serbia</button>
     </div></div>
-    <div class="ctl"><span class="lbl">Lingua delle notizie</span>
+    <div class="ctl"><span class="lbl">Lingua<span class="long"> delle notizie</span></span>
     <div class="seg lang" role="group" aria-label="Lingua delle notizie">
       <button id="lang-all" data-lang="all" aria-pressed="true">Tutte</button>
-      <button id="lang-it" data-lang="IT" aria-pressed="false" title="Solo notizie in italiano"><svg class="flag" viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#009246"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ce2b37"/></svg>Italiano</button>
-      <button id="lang-en" data-lang="EN" aria-pressed="false" title="Solo notizie in inglese"><svg class="flag" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="uk-t"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath><path d="M0,0v30h60v-30z" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" clip-path="url(#uk-t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></svg>English</button>
-      <button id="lang-sr" data-lang="SR" aria-pressed="false" title="Samo vesti na srpskom"><svg class="flag" viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#fff"/><rect width="3" height="1.3333" fill="#0c4076"/><rect width="3" height=".6667" fill="#c6363c"/></svg>Srpski</button>
+      <button id="lang-it" data-lang="IT" aria-pressed="false" title="Solo notizie in italiano"><svg class="flag" viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#009246"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ce2b37"/></svg><span class="nm">Italiano</span><span class="cd">IT</span></button>
+      <button id="lang-en" data-lang="EN" aria-pressed="false" title="Solo notizie in inglese"><svg class="flag" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="uk-t"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath><path d="M0,0v30h60v-30z" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" clip-path="url(#uk-t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></svg><span class="nm">English</span><span class="cd">EN</span></button>
+      <button id="lang-sr" data-lang="SR" aria-pressed="false" title="Samo vesti na srpskom"><svg class="flag" viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#fff"/><rect width="3" height="1.3333" fill="#0c4076"/><rect width="3" height=".6667" fill="#c6363c"/></svg><span class="nm">Srpski</span><span class="cd">SR</span></button>
     </div></div>
     <div class="chips" role="group" aria-label="Sezioni" id="topics"></div>
   </div>
