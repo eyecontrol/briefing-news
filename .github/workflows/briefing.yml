@@ -1,0 +1,57 @@
+name: Briefing mattiniero
+
+on:
+  schedule:
+    # Ogni giorno alle 04:00 UTC: le 06:00 in Italia con l'ora legale, le 05:00 con l'ora solare.
+    # GitHub può far partire i lavori programmati con qualche minuto di ritardo.
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: briefing-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test
+        run: python -m unittest discover -s tests -t . -v
+      - name: Raccogli le notizie e genera la pagina
+        run: python -m briefing.build --out site
+      - name: Stato dei feed
+        if: always()
+        run: cat site/feeds-report.txt || true
+      - name: Copia della pagina (per controllo)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: anteprima-briefing
+          path: site/
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
