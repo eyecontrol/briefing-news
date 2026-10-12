@@ -25,7 +25,7 @@ FIRST_ISSUE = date(2026, 10, 12)
 ROOT = Path(__file__).resolve().parent.parent
 USER_AGENT = "Mozilla/5.0 (compatible; BriefingMattiniero/1.0; +https://github.com/eyecontrol/briefing-news)"
 PER_SECTION = 10
-ITALY_PER_SECTION = 6
+COUNTRY_PER_SECTION = 6
 
 GIORNI = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"]
 MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto",
@@ -93,10 +93,32 @@ def clean(text, limit=None):
     return text
 
 
+def _loose_items(raw):
+    """Lettura di riserva per feed con XML non valido: estrae i campi con espressioni regolari."""
+    text = raw.decode("utf-8", errors="replace")
+    root = ET.Element("feed")
+    for block in re.findall(r"<(?:item|entry)\b.*?</(?:item|entry)>", text, re.S | re.I):
+        el = ET.SubElement(root, "item")
+        for name in ("title", "link", "guid", "description", "summary", "pubDate", "published", "updated", "dc:date"):
+            m = re.search(rf"<{name}\b([^>]*)>(.*?)</{name}>", block, re.S | re.I)
+            href = re.search(rf"<{name}\b[^>]*href=\"([^\"]+)\"", block, re.I) if name == "link" else None
+            if not m and not href:
+                continue
+            child = ET.SubElement(el, name.split(":")[-1])
+            if m:
+                child.text = re.sub(r"^\s*<!\[CDATA\[(.*?)\]\]>\s*$", r"\1", m.group(2), flags=re.S)
+            if href:
+                child.set("href", href.group(1))
+    return list(root)
+
+
 def parse_feed(raw):
     """Restituisce una lista di dict {title, url, summary, published} da RSS, RDF o Atom."""
-    root = ET.fromstring(raw)
-    items = [el for el in root.iter() if _local(el.tag) in ("item", "entry")]
+    try:
+        root = ET.fromstring(raw)
+        items = [el for el in root.iter() if _local(el.tag) in ("item", "entry")]
+    except ET.ParseError:
+        items = _loose_items(raw)
     out = []
     for el in items:
         title = clean(_text(el, "title"))
@@ -161,7 +183,7 @@ def select(raw_items, now):
         if not section:
             continue
         it["section"] = section
-        it["italy"] = classify.is_italy(it["feed_italy"], it["title"], it["summary"])
+        it["countries"] = classify.countries(it["feed_country"], it["title"], it["summary"])
         kept.append(it)
 
     stories = []
@@ -175,7 +197,7 @@ def select(raw_items, now):
         age_h = (now - main["published"]).total_seconds() / 3600
         main["score"] = round(len(sources) * 10 + max(0, 24 - age_h) / 4, 2)
         main["also"] = sources[1:]
-        main["italy"] = any(m["italy"] for m in members)
+        main["countries"] = sorted({c for m in members for c in m["countries"]})
         stories.append(main)
 
     stories.sort(key=lambda s: s["score"], reverse=True)
@@ -183,7 +205,8 @@ def select(raw_items, now):
     for key in classify.SECTIONS:
         sec = [s for s in stories if s["section"] == key]
         top = sec[:PER_SECTION]
-        top += [s for s in sec if s["italy"] and s not in top][:ITALY_PER_SECTION]
+        for code in ("IT", "RS"):
+            top += [s for s in sec if code in s["countries"] and s not in top][:COUNTRY_PER_SECTION]
         picked += top
     picked.sort(key=lambda s: s["score"], reverse=True)
     return picked
@@ -210,7 +233,7 @@ def render(stories, now, sources_ok):
     year = (local.date() - FIRST_ISSUE).days // 365 + 1
     data = [{
         "t": s["section"],
-        "it": s["italy"],
+        "c": s["countries"],
         "src": s["source"],
         "lang": OUTLETS[s["source"]][2],
         "time": when(s["published"], local),
@@ -287,7 +310,7 @@ def main(argv=None):
             if items:
                 ok_sources.add(feed["source"])
             for it in items:
-                it.update(source=feed["source"], default=feed["section"], feed_italy=feed["italy"],
+                it.update(source=feed["source"], default=feed["section"], feed_country=feed["country"],
                           max_age_h=feed["max_age_h"])
                 raw_items.append(it)
 
@@ -298,7 +321,7 @@ def main(argv=None):
     by_sec = {k: sum(1 for s in stories if s["section"] == k) for k in classify.SECTIONS}
     print("\nPrime notizie:")
     for s in stories[:40]:
-        print(f"  {s['section']} {'IT' if s['italy'] else '  '} {s['source'][:16]:<16} {s['score']:5.1f} +{len(s['also'])}  {s['title'][:100]}")
+        print(f"  {s['section']} {','.join(s['countries']):<5} {s['source'][:16]:<16} {s['score']:5.1f} +{len(s['also'])}  {s['title'][:100]}")
     print(f"\nNotizie scelte: {len(stories)}  per sezione: {by_sec}  testate attive: {len(ok_sources)}/{len(OUTLETS)}")
 
     out = Path(args.out)

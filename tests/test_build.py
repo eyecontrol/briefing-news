@@ -45,10 +45,10 @@ class BuildFromFixtures(unittest.TestCase):
         self.assertEqual(by_title["Ceasefire talks resume in Cairo after overnight strikes on Gaza"]["t"], "war")
         meloni = by_title["Italy's Meloni meets EU leaders on migration pact"]
         self.assertEqual(meloni["t"], "pol")
-        self.assertTrue(meloni["it"])
+        self.assertEqual(meloni["c"], ["IT"])
         allerta = by_title["Allerta rossa per maltempo in Liguria e Toscana"]
         self.assertEqual(allerta["t"], "cat")
-        self.assertTrue(allerta["it"])
+        self.assertEqual(allerta["c"], ["IT"])
         self.assertEqual(by_title["Ocean heat uptake mapped over six decades"]["t"], "sci")
 
     def test_page_has_no_placeholders_left(self):
@@ -69,6 +69,25 @@ class Rules(unittest.TestCase):
 
     def test_columns_and_newsletters_excluded(self):
         self.assertTrue(classify.is_excluded("Country diary: Fungi season is here", "", "https://x/science/1"))
+
+    def test_serbian_rules_in_both_scripts(self):
+        self.assertEqual(classify.pick_section("pol", "Земљотрес погодио југ Србије", ""), "cat")
+        self.assertEqual(classify.pick_section("pol", "Napad dronovima na Kijev, rat se nastavlja", ""), "war")
+        self.assertEqual(classify.countries(None, "Vučić u Briselu", ""), ["RS"])
+        self.assertEqual(classify.countries(None, "Седница Скупштине Србије", ""), ["RS"])
+        self.assertTrue(classify.is_excluded("Звезда победила Партизан", "", "https://x/1"))
+        self.assertTrue(classify.is_excluded("Đoković u finalu", "", "https://x/1"))
+
+    def test_malformed_feed_is_still_read(self):
+        raw = """<?xml version="1.0"?><rss><channel>
+        <item><title><![CDATA[Земљотрес у Србији]]></title><link>https://x.rs/1</link>
+        <description>Tekst & više</description><pubDate>Mon, 12 Oct 2026 04:00:00 GMT</pubDate></item>
+        </channel></rss>""".encode()
+        items = build.parse_feed(raw)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["title"], "Земљотрес у Србији")
+        self.assertEqual(items[0]["url"], "https://x.rs/1")
+        self.assertIsNotNone(items[0]["published"])
 
     def test_city_names_do_not_trigger_sport_filter(self):
         self.assertFalse(classify.is_excluded("Milan prosecutors open inquiry into bank", "", "https://x/world/1"))

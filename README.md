@@ -1,6 +1,6 @@
 # Il Briefing Mattiniero
 
-Ogni mattina una pagina in stile quotidiano con le notizie che contano, raccolte solo da 20 testate storiche italiane e internazionali. Sezioni: Politica, Guerre, Catastrofi, Economia e finanza, Scienza, Medicina, Tecnologia. Sport, spettacolo, gossip e lifestyle sono esclusi. In alto si sceglie l'edizione **Mondo** o **Italia**.
+Ogni mattina una pagina in stile quotidiano con le notizie che contano, raccolte solo da testate storiche italiane, serbe e internazionali. Sezioni: Politica, Guerre, Catastrofi, Economia e finanza, Scienza, Medicina, Tecnologia. Sport, spettacolo, gossip e lifestyle sono esclusi. In alto si sceglie l'edizione (**Mondo**, **Italia** o **Serbia**) e la lingua delle notizie (italiano, inglese o serbo).
 
 ## Come funziona
 
