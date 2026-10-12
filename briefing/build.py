@@ -88,9 +88,35 @@ def clean(text, limit=None):
     text = re.sub(r"<[^>]+>", " ", text or "")
     text = html.unescape(text)
     text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r" ([.,;:!?])", r"\1", text)
     if limit and len(text) > limit:
         text = text[:limit].rsplit(" ", 1)[0].rstrip(",;:.-") + "…"
     return text
+
+
+# Righe di servizio che i feed aggiungono in fondo al testo.
+BOILER = re.compile(
+    r"^(continue reading|read more|leggi (anche|tutto|l'articolo)|the post .* appeared first on|"
+    r"sign up|subscribe|iscriviti|related:|correlat|photo:|foto:|\(?(c|©) )", re.IGNORECASE)
+BODY_LIMIT = 6000
+
+
+def paragraphs(text):
+    """Testo dell'articolo come lista di paragrafi puliti (solo quello che il feed pubblica)."""
+    text = re.sub(r"(?is)<(script|style|figure|figcaption|iframe)\b.*?</\1>", " ", text or "")
+    text = re.sub(r"(?i)<br\s*/?>|</(p|div|li|h\d|blockquote)>", "\n\n", text)
+    out, total = [], 0
+    for chunk in re.split(r"\n\s*\n", text):
+        para = clean(chunk)
+        if len(para) < 2 or BOILER.search(para):
+            continue
+        if out and para == out[-1]:
+            continue
+        if total + len(para) > BODY_LIMIT:
+            break
+        out.append(para)
+        total += len(para)
+    return out
 
 
 def _loose_items(raw):
@@ -99,7 +125,7 @@ def _loose_items(raw):
     root = ET.Element("feed")
     for block in re.findall(r"<(?:item|entry)\b.*?</(?:item|entry)>", text, re.S | re.I):
         el = ET.SubElement(root, "item")
-        for name in ("title", "link", "guid", "description", "summary", "pubDate", "published", "updated", "dc:date"):
+        for name in ("title", "link", "guid", "description", "summary", "content:encoded", "content", "pubDate", "published", "updated", "dc:date"):
             m = re.search(rf"<{name}\b([^>]*)>(.*?)</{name}>", block, re.S | re.I)
             href = re.search(rf"<{name}\b[^>]*href=\"([^\"]+)\"", block, re.I) if name == "link" else None
             if not m and not href:
@@ -126,8 +152,13 @@ def parse_feed(raw):
         if not title or not url:
             continue
         summary = _text(el, "description", "summary", "encoded", "content")
+        full = max((_text(el, n) for n in ("description", "summary", "encoded", "content")), key=len)
+        body = paragraphs(full)
+        if body and clean(body[0]) == title:
+            body = body[1:]
         published = parse_date(_text(el, "pubdate", "published", "updated", "date"))
-        out.append({"title": title, "url": url, "summary": clean(summary, 320), "published": published})
+        out.append({"title": title, "url": url, "summary": clean(summary, 320), "body": body,
+                    "published": published})
     return out
 
 
@@ -197,6 +228,12 @@ def select(raw_items, now):
         age_h = (now - main["published"]).total_seconds() / 3600
         main["score"] = round(len(sources) * 10 + max(0, 24 - age_h) / 4, 2)
         main["also"] = sources[1:]
+        # Testo da leggere nel briefing: quello della notizia scelta o, se è solo un sommario,
+        # il più lungo pubblicato da un'altra testata sulla stessa notizia.
+        richest = max(members, key=lambda m: sum(map(len, m.get("body", []))))
+        main["body_src"] = None
+        if sum(map(len, main.get("body", []))) < 400 and sum(map(len, richest.get("body", []))) >= 400:
+            main["body"], main["body_src"] = richest["body"], {"src": richest["source"], "url": richest["url"]}
         main["countries"] = sorted({c for m in members for c in m["countries"]})
         stories.append(main)
 
@@ -241,6 +278,8 @@ def render(stories, now, sources_ok):
         "p": s["summary"],
         "url": s["url"],
         "also": s["also"],
+        "b": s.get("body") or [],
+        "bs": s.get("body_src"),
     } for s in stories]
     groups = {}
     for name, (founded, group, _lang) in OUTLETS.items():
@@ -322,6 +361,12 @@ def main(argv=None):
     print("\nPrime notizie:")
     for s in stories[:40]:
         print(f"  {s['section']} {','.join(s['countries']):<5} {s['source'][:16]:<16} {s['score']:5.1f} +{len(s['also'])}  {s['title'][:100]}")
+    print("\nTesto leggibile nel briefing (caratteri medi per notizia):")
+    lengths = {}
+    for it in raw_items:
+        lengths.setdefault(it["source"], []).append(sum(map(len, it.get("body", []))))
+    for src, ls in sorted(lengths.items(), key=lambda x: -sum(x[1]) / len(x[1])):
+        print(f"  {src:<36} {sum(ls) // len(ls):5d}  (max {max(ls)})")
     print(f"\nNotizie scelte: {len(stories)}  per sezione: {by_sec}  testate attive: {len(ok_sources)}/{len(OUTLETS)}")
 
     out = Path(args.out)

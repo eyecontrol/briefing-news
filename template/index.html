@@ -102,6 +102,20 @@ article.card { background: var(--card); border: 1px solid var(--line); border-ra
 .c-pol { --c: var(--pol); } .c-war { --c: var(--war); } .c-cat { --c: var(--cat); } .c-eco { --c: var(--eco); }
 .c-sci { --c: var(--sci); } .c-med { --c: var(--med); } .c-tec { --c: var(--tec); }
 
+/* Lettura */
+.reader { position: fixed; inset: 0; z-index: 20; background: var(--paper); overflow-y: auto; overscroll-behavior: contain; }
+.reader[hidden] { display: none; }
+.reader .top { position: sticky; top: 0; background: var(--band); color: var(--band-ink); padding-top: env(safe-area-inset-top, 0px); }
+.reader .top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
+.reader .back { font: 700 14px var(--f-label); color: inherit; background: transparent; border: 2px solid rgba(255,255,255,.5); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.reader .top span { font-family: var(--f-mast); font-size: 22px; }
+.reader article { max-width: 68ch; margin: 0 auto; padding: 22px 18px 50px; display: grid; gap: 12px; }
+.reader h1 { font-weight: 800; font-size: clamp(26px, 5vw, 38px); line-height: 1.12; margin: 0; text-wrap: balance; }
+.reader .text p { font-size: 19px; line-height: 1.6; margin: 0 0 16px; }
+.reader .note { font-family: var(--f-label); font-size: 13px; color: var(--grey); border-top: 1px solid var(--line); padding-top: 12px; margin: 6px 0 0; }
+.reader .note a { color: var(--grey); }
+body.reading { overflow: hidden; }
+
 /* Fonti */
 footer.colophon { margin-top: 30px; background: var(--card); border-top: 1px solid var(--line); padding-block: 26px 40px; }
 .colophon h2 { font-weight: 800; font-size: 24px; margin: 0 0 4px; }
@@ -165,10 +179,15 @@ footer.colophon { margin-top: 30px; background: var(--card); border-top: 1px sol
   <div id="sections" style="display:grid;gap:34px"></div>
 </main>
 
+<div class="reader" id="reader" hidden role="dialog" aria-modal="true" aria-label="Articolo">
+  <div class="top"><div class="wrap"><button class="back" id="back">← Torna al briefing</button><span aria-hidden="true">Il Briefing</span></div></div>
+  <article id="reader-body"></article>
+</div>
+
 <footer class="colophon">
   <div class="wrap">
     <h2>Le fonti di questo giornale</h2>
-    <p>Solo testate storiche e agenzie riconosciute, con l'anno di fondazione. Gli articoli restano nella lingua originale, italiano o inglese.</p>
+    <p>Solo testate storiche e agenzie riconosciute, con l'anno di fondazione. Gli articoli restano nella lingua originale, italiano, inglese o serbo. Ogni notizia si legge qui, senza pubblicità, con il testo che il giornale pubblica nel suo feed.</p>
     <div class="srcs">
 __COLOPHON__
     </div>
@@ -183,7 +202,7 @@ const stories = __DATA__;
 const state = { scope: "world", lang: "all", on: new Set(Object.keys(T)) };
 const FLAGS = Object.fromEntries([...document.querySelectorAll(".seg.lang button[data-lang] .flag")].map(f => [f.closest("button").dataset.lang, f.outerHTML]));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const link = (s, text, cls) => `<a${cls ? ` class="${cls}"` : ""} href="${esc(s.url)}" target="_blank" rel="noopener">${text}</a>`;
+const link = (s, text, cls) => `<a${cls ? ` class="${cls}"` : ""} href="#n${stories.indexOf(s)}">${text}</a>`;
 const topics = document.getElementById("topics");
 Object.entries(T).forEach(([k, name]) => {
   const b = document.createElement("button");
@@ -203,7 +222,7 @@ function render() {
   const top = vis[0];
   const brief = vis.slice(1, 5);
   lead.hidden = !top;
-  if (top) lead.innerHTML = `<div class="lead-main c-${top.t}"><span class="kicker lbl">Apertura · ${esc(T[top.t])}</span><h2>${link(top, esc(top.h))}</h2>${by(top)}${top.p ? `<p class="sum">${esc(top.p)}</p>` : ""}${also(top)}${link(top, "Leggi sulla fonte", "go")}</div>
+  if (top) lead.innerHTML = `<div class="lead-main c-${top.t}"><span class="kicker lbl">Apertura · ${esc(T[top.t])}</span><h2>${link(top, esc(top.h))}</h2>${by(top)}${top.p ? `<p class="sum">${esc(top.p)}</p>` : ""}${also(top)}${link(top, "Leggi qui", "go")}</div>
     <aside class="brief"><h3 class="lbl">In breve</h3><ol>${brief.map(s => `<li><span>${link(s, esc(s.h))}<small>${esc(T[s.t])} · ${esc(s.src)}</small></span></li>`).join("")}</ol></aside>`;
   const box = document.getElementById("sections");
   box.innerHTML = "";
@@ -213,7 +232,7 @@ function render() {
     const sec = document.createElement("section");
     sec.className = "sec c-" + k;
     sec.innerHTML = `<h2>${esc(T[k])}<span>${list.length}</span></h2>` + (list.length
-      ? `<div class="cards">${list.map(s => `<article class="card">${by(s)}<h3>${link(s, esc(s.h))}</h3>${s.p ? `<p>${esc(s.p)}</p>` : ""}${also(s)}${link(s, "Leggi sulla fonte", "go")}</article>`).join("")}</div>`
+      ? `<div class="cards">${list.map(s => `<article class="card">${by(s)}<h3>${link(s, esc(s.h))}</h3>${s.p ? `<p>${esc(s.p)}</p>` : ""}${also(s)}${link(s, "Leggi qui", "go")}</article>`).join("")}</div>`
       : `<div class="empty">Nessuna notizia in questa sezione stamattina.</div>`);
     box.appendChild(sec);
   }
@@ -226,7 +245,37 @@ for (const [key, attr] of [["scope", "data-scope"], ["lang", "data-lang"]]) {
     render();
   }));
 }
+const reader = document.getElementById("reader");
+let scrollY = 0;
+function openStory() {
+  const m = location.hash.match(/^#n(\d+)$/);
+  const s = m && stories[+m[1]];
+  if (!s) {
+    if (!reader.hidden) { reader.hidden = true; document.body.classList.remove("reading"); window.scrollTo(0, scrollY); }
+    return;
+  }
+  if (reader.hidden) scrollY = window.scrollY;
+  const text = s.b.length ? s.b : (s.p ? [s.p] : []);
+  const short = text.join(" ").length < 400;
+  const from = s.bs ? `Testo di <b>${esc(s.bs.src)}</b> sulla stessa notizia. ` : "";
+  const orig = s.bs || s;
+  document.getElementById("reader-body").className = "c-" + s.t;
+  document.getElementById("reader-body").innerHTML = `<span class="kicker lbl">${esc(T[s.t])}</span><h1>${esc(s.h)}</h1>${by(s)}${also(s)}
+    <div class="text">${text.map(p => `<p>${esc(p)}</p>`).join("") || "<p><i>Il giornale non pubblica il testo di questa notizia.</i></p>"}</div>
+    <p class="note">${from}${short ? "Il giornale rende disponibile solo questo estratto. " : ""}Fonte: <a href="${esc(orig.url)}" target="_blank" rel="noopener">${esc(orig.src || s.src)} ↗</a></p>`;
+  reader.hidden = false;
+  document.body.classList.add("reading");
+  reader.scrollTop = 0;
+}
+let fromList = false;
+document.getElementById("back").addEventListener("click", () => {
+  if (fromList) history.back();
+  else { history.replaceState(null, "", location.pathname + location.search); openStory(); }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !reader.hidden) document.getElementById("back").click(); });
+window.addEventListener("hashchange", () => { fromList = /^#n\d+$/.test(location.hash); openStory(); });
 render();
+openStory();
 </script>
 </body>
 </html>

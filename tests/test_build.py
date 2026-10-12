@@ -89,6 +89,16 @@ class Rules(unittest.TestCase):
         self.assertEqual(items[0]["url"], "https://x.rs/1")
         self.assertIsNotNone(items[0]["published"])
 
+    def test_full_text_from_feed_is_kept_clean(self):
+        raw = """<?xml version="1.0"?><rss xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>
+        <item><title>Storm hits coast</title><link>https://x/1</link><description>Short summary.</description>
+        <content:encoded><![CDATA[<p>First paragraph.</p><figure><img src="a.jpg"><figcaption>Photo</figcaption></figure>
+        <p>Second <a href="#">paragraph</a>.</p><p><a href="https://x/1">Continue reading...</a></p>]]></content:encoded>
+        <pubDate>Mon, 12 Oct 2026 04:00:00 GMT</pubDate></item></channel></rss>""".encode()
+        items = build.parse_feed(raw)
+        self.assertEqual(items[0]["summary"], "Short summary.")
+        self.assertEqual(items[0]["body"], ["First paragraph.", "Second paragraph."])
+
     def test_city_names_do_not_trigger_sport_filter(self):
         self.assertFalse(classify.is_excluded("Milan prosecutors open inquiry into bank", "", "https://x/world/1"))
 
