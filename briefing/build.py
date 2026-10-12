@@ -8,7 +8,9 @@ import argparse
 import html
 import json
 import re
+import subprocess
 import sys
+import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
@@ -36,8 +38,18 @@ MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", 
 
 def fetch(url, timeout=20):
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/rss+xml, application/xml, text/xml, */*"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read()
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.read()
+    except urllib.error.URLError as e:
+        # Alcuni siti rifiutano la connessione TLS di Python ma accettano curl.
+        if isinstance(e, urllib.error.HTTPError):
+            raise
+        done = subprocess.run(["curl", "-fsSL", "--max-time", str(timeout), "-A", USER_AGENT, url],
+                              capture_output=True, check=False)
+        if done.returncode != 0 or not done.stdout:
+            raise
+        return done.stdout
 
 
 def _local(tag):
@@ -295,6 +307,9 @@ def main(argv=None):
 
     stories = select(raw_items, now)
     by_sec = {k: sum(1 for s in stories if s["section"] == k) for k in classify.SECTIONS}
+    print("\nPrime notizie:")
+    for s in stories[:40]:
+        print(f"  {s['section']} {'IT' if s['italy'] else '  '} {s['source'][:16]:<16} {s['score']:5.1f} +{len(s['also'])}  {s['title'][:100]}")
     print(f"\nNotizie scelte: {len(stories)}  per sezione: {by_sec}  testate attive: {len(ok_sources)}/{len(OUTLETS)}")
 
     out = Path(args.out)

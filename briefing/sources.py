@@ -45,9 +45,10 @@ FEEDS = [
     feed("ANSA", "https://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml", None, italy=True),
     feed("ANSA", "https://www.ansa.it/sito/notizie/economia/economia_rss.xml", "eco"),
     feed("ANSA", "https://www.ansa.it/sito/notizie/tecnologia/tecnologia_rss.xml", "tec"),
-    feed("ANSA", "https://www.ansa.it/canale_scienza/notizie/scienza_rss.xml", "sci"),
+    feed("ANSA", "https://www.ansa.it/canale_scienza_tecnica/notizie/scienzaetecnica_rss.xml", "sci"),
     feed("ANSA", "https://www.ansa.it/canale_saluteebenessere/notizie/saluteebenessere_rss.xml", "med"),
     feed("Corriere della Sera", "https://xml2.corriereobjects.it/rss/politica.xml", "pol", italy=True),
+    feed("Corriere della Sera", "https://xml2.corriereobjects.it/rss/homepage.xml", None),
     feed("Corriere della Sera", "https://xml2.corriereobjects.it/rss/esteri.xml", "pol"),
     feed("Corriere della Sera", "https://xml2.corriereobjects.it/rss/cronache.xml", None, italy=True),
     feed("Corriere della Sera", "https://xml2.corriereobjects.it/rss/economia.xml", "eco"),
@@ -100,7 +101,8 @@ FEEDS = [
     # Medicina
     feed("The New England Journal of Medicine", "https://www.nejm.org/action/showFeed?type=etoc&feed=rss&jc=nejm", "med", max_age_h=192),
     feed("The Lancet", "https://www.thelancet.com/rssfeed/lancet_online.xml", "med", max_age_h=192),
-    feed("The BMJ", "https://www.bmj.com/rss/news.xml", "med", max_age_h=72),
+    feed("The BMJ", "https://www.bmj.com/rss/recent.xml", "med", max_age_h=72),
+    feed("The BMJ", "https://feeds.bmj.com/bmj/recent", "med", max_age_h=72),
     # Scienza e tecnologia
     feed("Nature", "https://www.nature.com/nature.rss", "sci", max_age_h=96),
     feed("Scientific American", "https://www.scientificamerican.com/platform/syndication/rss/", "sci", max_age_h=72),
