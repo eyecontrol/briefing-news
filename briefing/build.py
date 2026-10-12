@@ -93,10 +93,32 @@ def clean(text, limit=None):
     return text
 
 
+def _loose_items(raw):
+    """Lettura di riserva per feed con XML non valido: estrae i campi con espressioni regolari."""
+    text = raw.decode("utf-8", errors="replace")
+    root = ET.Element("feed")
+    for block in re.findall(r"<(?:item|entry)\b.*?</(?:item|entry)>", text, re.S | re.I):
+        el = ET.SubElement(root, "item")
+        for name in ("title", "link", "guid", "description", "summary", "pubDate", "published", "updated", "dc:date"):
+            m = re.search(rf"<{name}\b([^>]*)>(.*?)</{name}>", block, re.S | re.I)
+            href = re.search(rf"<{name}\b[^>]*href=\"([^\"]+)\"", block, re.I) if name == "link" else None
+            if not m and not href:
+                continue
+            child = ET.SubElement(el, name.split(":")[-1])
+            if m:
+                child.text = re.sub(r"^\s*<!\[CDATA\[(.*?)\]\]>\s*$", r"\1", m.group(2), flags=re.S)
+            if href:
+                child.set("href", href.group(1))
+    return list(root)
+
+
 def parse_feed(raw):
     """Restituisce una lista di dict {title, url, summary, published} da RSS, RDF o Atom."""
-    root = ET.fromstring(raw)
-    items = [el for el in root.iter() if _local(el.tag) in ("item", "entry")]
+    try:
+        root = ET.fromstring(raw)
+        items = [el for el in root.iter() if _local(el.tag) in ("item", "entry")]
+    except ET.ParseError:
+        items = _loose_items(raw)
     out = []
     for el in items:
         title = clean(_text(el, "title"))

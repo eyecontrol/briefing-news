@@ -17,7 +17,6 @@ OUTLETS = {
     "la Repubblica": (1976, "Italia", "IT"),
     "Politika": (1904, "Serbia", "SR"),
     "RTS": (1924, "Serbia", "SR"),
-    "Tanjug": (1943, "Serbia", "SR"),
     "Večernje novosti": (1953, "Serbia", "SR"),
     "The Guardian": (1821, "Internazionali", "EN"),
     "The New York Times": (1851, "Internazionali", "EN"),
@@ -70,17 +69,9 @@ FEEDS = [
     feed("Il Messaggero", "https://www.ilmessaggero.it/rss/politica.xml", "pol", country="IT"),
     feed("Il Messaggero", "https://www.ilmessaggero.it/rss/mondo.xml", "pol"),
     feed("Il Messaggero", "https://www.ilmessaggero.it/rss/economia.xml", "eco"),
-    # Serbia (in serbo). Più indirizzi per testata: quelli che non rispondono vengono saltati.
+    # Serbia (in serbo). Tanjug (1943) blocca i server di GitHub e resta fuori.
     feed("Politika", "https://www.politika.rs/rss/", "pol"),
-    feed("Politika", "https://www.politika.rs/rss/rubrika/1", "pol", country="RS"),
-    feed("Politika", "https://www.politika.rs/rss/rubrika/2", "pol"),
-    feed("Politika", "https://www.politika.rs/rss/rubrika/3", "eco"),
-    feed("RTS", "https://www.rts.rs/rss/ci.html", "pol"),
     feed("RTS", "https://www.rts.rs/page/stories/ci/rss.html", "pol"),
-    feed("RTS", "https://www.rts.rs/rss/page/stories/ci/9/politika.xml", "pol", country="RS"),
-    feed("Tanjug", "https://www.tanjug.rs/rss", "pol"),
-    feed("Tanjug", "https://www.tanjug.rs/feed", "pol"),
-    feed("Večernje novosti", "https://www.novosti.rs/rss", "pol"),
     feed("Večernje novosti", "https://www.novosti.rs/rss/vesti", "pol"),
     # Internazionali
     feed("BBC News", "https://feeds.bbci.co.uk/news/world/rss.xml", "pol"),

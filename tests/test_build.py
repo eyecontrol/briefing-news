@@ -78,6 +78,17 @@ class Rules(unittest.TestCase):
         self.assertTrue(classify.is_excluded("Звезда победила Партизан", "", "https://x/1"))
         self.assertTrue(classify.is_excluded("Đoković u finalu", "", "https://x/1"))
 
+    def test_malformed_feed_is_still_read(self):
+        raw = """<?xml version="1.0"?><rss><channel>
+        <item><title><![CDATA[Земљотрес у Србији]]></title><link>https://x.rs/1</link>
+        <description>Tekst & više</description><pubDate>Mon, 12 Oct 2026 04:00:00 GMT</pubDate></item>
+        </channel></rss>""".encode()
+        items = build.parse_feed(raw)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["title"], "Земљотрес у Србији")
+        self.assertEqual(items[0]["url"], "https://x.rs/1")
+        self.assertIsNotNone(items[0]["published"])
+
     def test_city_names_do_not_trigger_sport_filter(self):
         self.assertFalse(classify.is_excluded("Milan prosecutors open inquiry into bank", "", "https://x/world/1"))
 
